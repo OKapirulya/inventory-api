@@ -1,0 +1,41 @@
+{
+  "name": "inventory-api",
+  "version": "1.0.0",
+  "description": "REST API for inventory management: Node.js, Hono, PostgreSQL, Redis, Docker",
+  "main": "dist/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "nodemon --exec tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OKapirulya/inventory-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/OKapirulya/inventory-api/issues"
+  },
+  "homepage": "https://github.com/OKapirulya/inventory-api#readme",
+  "dependencies": {
+    "@hono/node-server": "^2.1.3",
+    "dotenv": "^18.0.5",
+    "hono": "^4.13.12",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1",
+    "redis": "^6.3.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.6.3",
+    "@types/pg": "^8.23.1",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
