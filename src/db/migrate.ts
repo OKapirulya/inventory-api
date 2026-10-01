@@ -1,11 +1,12 @@
 import fs from 'fs'
 import path from 'path'
 import { db } from './client'
+import { logger } from '../logger'
 
 const migrationsDir = path.join(__dirname, 'migrations')
 
 async function migrate() {
-  console.log('Running migrations...')
+  logger.info('Running migrations...')
 
   await db.query(`
     CREATE TABLE IF NOT EXISTS migrations (
@@ -26,21 +27,21 @@ async function migrate() {
     )
 
     if (rows.length > 0) {
-      console.log(`Skipping ${file} (already executed)`)
+      logger.debug({ file }, 'Skipping migration (already executed)')
       continue
     }
 
     const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8')
     await db.query(sql)
     await db.query('INSERT INTO migrations (filename) VALUES ($1)', [file])
-    console.log(`Executed ${file}`)
+    logger.info({ file }, 'Migration executed')
   }
 
-  console.log('Migrations complete')
+  logger.info('Migrations complete')
   await db.end()
 }
 
 migrate().catch((err) => {
-  console.error('Migration failed:', err)
+  logger.error({ err }, 'Migration failed')
   process.exit(1)
 })
