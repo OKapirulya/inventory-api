@@ -2,6 +2,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import dotenv from 'dotenv'
 import auth from './routes/auth'
+import products from './routes/product'
 import { logger } from './logger'
 
 if (process.env.NODE_ENV !== 'production') {
@@ -20,6 +21,7 @@ app.get('/', (c) => {
 })
 
 app.route('/auth', auth)
+app.route('/products', products)
 
 const port = Number(process.env.PORT) || 3000
 
