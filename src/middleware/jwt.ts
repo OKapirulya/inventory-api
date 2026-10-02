@@ -1,5 +1,5 @@
 import { Context, Next } from 'hono'
-import jwt from 'jsonwebtoken'
+import jwt, { JwtPayload } from 'jsonwebtoken'
 
 export async function authMiddleware(c: Context, next: Next) {
   const authHeader = c.req.header('Authorization')
@@ -11,8 +11,8 @@ export async function authMiddleware(c: Context, next: Next) {
   const token = authHeader.split(' ')[1]
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET as string)
-    c.set('user', payload)
+    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload & { id: number; email: string }
+    c.set('user', { id: payload.id, email: payload.email })
     await next()
   } catch {
     return c.json({ error: 'Invalid token' }, 401)
