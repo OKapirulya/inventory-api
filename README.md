@@ -64,7 +64,11 @@ Every push to main triggers a pipeline that lints the code, checks TypeScript ty
 Work in progress. The following is planned or in development:
 
 Redis rate limiting and caching — in progress
+
 Deployment to Hetzner VPS — planned
+
 Monitoring with Prometheus and Grafana — planned
+
 Log aggregation with Loki — planned
+
 Kubernetes deployment — planned
