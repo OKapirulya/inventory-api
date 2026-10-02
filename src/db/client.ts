@@ -1,9 +1,9 @@
-import { Pool } from 'pg'
+import { Pool, QueryResult, QueryResultRow } from 'pg'
 import { logger } from '../logger'
 
 let pool: Pool | null = null
 
-export function getDb(): Pool {
+function getDb(): Pool {
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -19,6 +19,9 @@ export function getDb(): Pool {
 }
 
 export const db = {
-  query: (...args: Parameters<Pool['query']>) => getDb().query(...args as [string]),
+  query: <T extends QueryResultRow = QueryResultRow>(
+    text: string,
+    values?: unknown[]
+  ): Promise<QueryResult<T>> => getDb().query<T>(text, values),
   end: () => pool?.end(),
 }

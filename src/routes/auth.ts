@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import jwt, { SignOptions } from 'jsonwebtoken'
 import { db } from '../db/client'
 import { UserResponse } from '../models/user'
 import { registerSchema, loginSchema } from '../validators/auth'
@@ -10,7 +10,7 @@ const auth = new Hono()
 
 auth.post('/register', async (c) => {
   const body = await c.req.json()
-  
+
   const result = registerSchema.safeParse(body)
   if (!result.success) {
     const message = result.error.issues[0]?.message ?? 'Invalid input'
@@ -30,12 +30,12 @@ auth.post('/register', async (c) => {
 
   const password_hash = await bcrypt.hash(password, 12)
 
-  const dbResult = await db.query(
+  const dbResult = await db.query<UserResponse>(
     'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at',
     [email, password_hash]
   )
 
-  const user: UserResponse = dbResult.rows[0]
+  const user = dbResult.rows[0]
   logger.info({ userId: user.id }, 'User registered')
 
   return c.json({ user }, 201)
@@ -68,10 +68,14 @@ auth.post('/login', async (c) => {
     return c.json({ error: 'Invalid credentials' }, 401)
   }
 
+  const options: SignOptions = {
+    expiresIn: (process.env.JWT_EXPIRES_IN ?? '7d') as SignOptions['expiresIn'],
+  }
+
   const token = jwt.sign(
     { id: user.id, email: user.email },
     process.env.JWT_SECRET as string,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    options
   )
 
   logger.info({ userId: user.id }, 'User logged in')
