@@ -5,7 +5,9 @@ import auth from './routes/auth'
 import products from './routes/product'
 import { logger } from './logger'
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({ path: '.env.test' })
+} else if (process.env.NODE_ENV !== 'production') {
   dotenv.config()
 }
 
@@ -25,11 +27,13 @@ app.route('/products', products)
 
 const port = Number(process.env.PORT) || 3000
 
-serve({
-  fetch: app.fetch,
-  port,
-}, () => {
-  logger.info(`Server running on port ${port}`)
-})
+if (process.env.NODE_ENV !== 'test') {
+  serve({
+    fetch: app.fetch,
+    port,
+  }, () => {
+    logger.info(`Server running on port ${port}`)
+  })
+}
 
 export default app

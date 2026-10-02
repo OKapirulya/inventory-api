@@ -1,11 +1,24 @@
 import { Pool } from 'pg'
 import { logger } from '../logger'
 
-export const db = new Pool({
-  connectionString: process.env.DATABASE_URL,
-})
+let pool: Pool | null = null
 
-db.on('error', (err) => {
-  logger.error({ err }, 'Unexpected database error')
-  process.exit(1)
-})
+export function getDb(): Pool {
+  if (!pool) {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    })
+
+    pool.on('error', (err) => {
+      logger.error({ err }, 'Unexpected database error')
+      process.exit(1)
+    })
+  }
+
+  return pool
+}
+
+export const db = {
+  query: (...args: Parameters<Pool['query']>) => getDb().query(...args as [string]),
+  end: () => pool?.end(),
+}
