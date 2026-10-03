@@ -3,10 +3,11 @@ import { db } from '../db/client'
 import { authMiddleware } from '../middleware/jwt'
 import { createProductSchema, updateProductSchema } from '../validators/product'
 import { logger } from '../logger'
+import { userRateLimit } from '../middleware/rateLimit'
 
 const products = new Hono()
 
-products.use('*', authMiddleware)
+products.use('*', authMiddleware, userRateLimit)
 
 products.get('/', async (c) => {
   const user = c.get('user') as { id: number }

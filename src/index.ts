@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import auth from './routes/auth'
 import products from './routes/product'
 import { logger } from './logger'
+import { redis } from './db/redis'
 
 if (process.env.NODE_ENV === 'test') {
   dotenv.config({ path: '.env.test' })
@@ -28,12 +29,25 @@ app.route('/products', products)
 const port = Number(process.env.PORT) || 3000
 
 if (process.env.NODE_ENV !== 'test') {
-  serve({
-    fetch: app.fetch,
-    port,
-  }, () => {
-    logger.info(`Server running on port ${port}`)
-  })
+  async function start() {
+    // Redis vorab verbinden damit der erste Request keine Latenz hat
+    await redis.get('ping').catch(() => { })
+
+    serve({
+      fetch: app.fetch,
+      port,
+    }, () => {
+      logger.info(`Server running on port ${port}`)
+    })
+
+    process.on('SIGTERM', async () => {
+      logger.info('Shutting down...')
+      await redis.quit()
+      process.exit(0)
+    })
+  }
+
+  start()
 }
 
 export default app

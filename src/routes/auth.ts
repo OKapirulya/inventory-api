@@ -5,10 +5,11 @@ import { db } from '../db/client'
 import { UserResponse } from '../models/user'
 import { registerSchema, loginSchema } from '../validators/auth'
 import { logger } from '../logger'
+import { ipRateLimit } from '../middleware/rateLimit'
 
 const auth = new Hono()
 
-auth.post('/register', async (c) => {
+auth.post('/register', ipRateLimit, async (c) => {
   const body = await c.req.json()
 
   const result = registerSchema.safeParse(body)
@@ -41,7 +42,7 @@ auth.post('/register', async (c) => {
   return c.json({ user }, 201)
 })
 
-auth.post('/login', async (c) => {
+auth.post('/login', ipRateLimit, async (c) => {
   const body = await c.req.json()
 
   const result = loginSchema.safeParse(body)
