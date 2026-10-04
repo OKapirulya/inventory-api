@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: inventory-api
     build:
       context: .
       dockerfile: Dockerfile.dev
