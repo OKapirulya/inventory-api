@@ -14,9 +14,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - default
-      - monitoring-bridge
+    #networks:
+      #- default
+      #- monitoring-bridge
 
   postgres:
     image: postgres:16-alpine
@@ -48,7 +48,7 @@ volumes:
   postgres_data:
   redis_data:
 
-networks:
-  default:
-  monitoring-bridge:
-    external: true
+#networks:
+ # default:
+  #monitoring-bridge:
+   # external: true
