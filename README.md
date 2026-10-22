@@ -1,18 +1,40 @@
-# Inventory API
+# inventory-api
 
 A REST API for managing product inventory, built as a portfolio project to demonstrate backend development and DevOps practices.
 
-This project is part of a larger portfolio that includes a full observability stack with Prometheus, Grafana, Loki, and Alertmanager.
+## Overview
 
-## What this project covers
+This project covers both sides of the stack: a production-style REST API (authentication, validation, rate limiting, structured logging) and the infrastructure around it (containerization, CI/CD, HTTPS deployment, observability).
 
-On the backend side: REST API design, JWT authentication, database migrations, input validation, structured logging with Pino, Redis rate limiting, and error handling.
+It's part of a larger portfolio that includes a full observability stack with Prometheus, Grafana, Loki, and Alertmanager.
 
-On the infrastructure side: multi-stage Docker builds, Docker Compose with multiple services, automated CI/CD with GitHub Actions, HTTPS deployment on a VPS with Nginx, and application metrics via Prometheus.
+## Stack
 
-## Tech stack
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+![Hono](https://img.shields.io/badge/Hono-E36002?style=flat&logo=hono&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
 
-Node.js with Hono as the web framework, PostgreSQL as the database, Redis for rate limiting, Docker and Docker Compose for containerization, and GitHub Actions for continuous integration and deployment.
+## Features
+
+**API**: REST endpoints for authentication and product management, built with Hono.
+
+**Authentication**: JWT-based, with access tokens issued on login.
+
+**Validation**: request input is validated before it reaches the database layer.
+
+**Rate limiting**: Redis-backed, IP-based on auth endpoints, user-based on product endpoints.
+
+**Logging**: structured logs via Pino, shipped to the monitoring stack through Grafana Alloy.
+
+**Database**: PostgreSQL, with versioned SQL migrations.
+
+## Infrastructure
+
+Multi-stage Docker builds, Docker Compose for local development and production, automated CI/CD with GitHub Actions, HTTPS on a VPS via Nginx and Certbot, and application metrics exposed for Prometheus.
 
 ## Live
 
@@ -20,29 +42,40 @@ The API is running at https://api.olegkapy.com
 
 ## Getting started
 
-You need Docker and Docker Compose installed on your machine.
+You need Docker and Docker Compose installed.
 
-Clone the repository and copy the environment file:
-
-    git clone https://github.com/OKapirulya/inventory-api.git
-    cd inventory-api
-    cp .env.example .env
-
-Start all services:
-
-    docker compose up --build
+```bash
+git clone https://github.com/OKapirulya/inventory-api.git
+cd inventory-api
+cp .env.example .env
+docker compose up --build
+```
 
 Run database migrations:
 
-    docker compose exec api npm run migrate
+```bash
+docker compose exec api npm run migrate
+```
 
-The API runs on port 3000. You can verify it is working by calling:
+The API runs on port 3000:
 
-    curl http://localhost:3000
+```bash
+curl http://localhost:3000
+```
+
+### Environment variables
+
+| Variable | Description |
+|---|---|
+| `PORT` | Port the API listens on |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection string |
+| `JWT_SECRET` | Secret used to sign JWTs |
+| `JWT_EXPIRES_IN` | JWT expiry (e.g. `7d`) |
 
 ## API endpoints
 
-Authentication is handled with JWT. Register a user, log in to receive a token, and pass the token as a Bearer header on all product endpoints.
+Authentication is handled with JWT. Register, log in, then pass the token as a Bearer header on all product endpoints.
 
     POST /auth/register
     POST /auth/login
@@ -55,26 +88,27 @@ Authentication is handled with JWT. Register a user, log in to receive a token, 
 
 Rate limiting is applied on all auth endpoints (IP-based) and product endpoints (user-based).
 
+
 ## Running tests
 
 Tests run against a real PostgreSQL database. Make sure Docker is running, then:
 
-    npm test
+```bash
+npm test
+```
 
 ## CI/CD pipeline
 
-Every push to main triggers a pipeline that lints the code, checks TypeScript types, runs the test suite against a PostgreSQL service container, compiles the project, builds the production Docker image, and deploys automatically to the VPS via SSH.
+Every push to `main` lints the code, checks TypeScript types, runs the test suite against a PostgreSQL service container, compiles the project, builds the production Docker image, and deploys automatically to the VPS via SSH.
 
 ## Observability
 
-Application metrics are exposed at /metrics and scraped by Prometheus. Logs are collected by Grafana Alloy and stored in Loki. Both are visualized in Grafana alongside system metrics from Node Exporter.
+Metrics are exposed at `/metrics` and scraped by Prometheus. Logs are collected by Grafana Alloy and stored in Loki. Both are visualized in Grafana alongside system metrics from Node Exporter, and Alertmanager routes alerts to email.
 
-The monitoring stack lives in a separate repository at github.com/OKapirulya/monitoring-stack.
+## Related
+
+[monitoring-stack](https://github.com/OKapirulya/monitoring-stack)
 
 ## Project status
 
-Work in progress. The following is planned or in development:
-
-Infrastructure as Code with Terraform and Ansible: development
-
-Kubernetes deployment: planned
+Infrastructure as Code with Terraform and Ansible: environment provisioning (hardening, Docker, Nginx, TLS) is automated; application deployment is still CI/CD-driven.
